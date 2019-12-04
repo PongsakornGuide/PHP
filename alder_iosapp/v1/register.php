@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             //สำเร็จ
             $response['error'] = false;
             $response['message'] = 'User created successfully';
+
         } elseif ($result == USER_ALREADY_EXIST) {
             //ซ้ำ
             $response['error'] = true;

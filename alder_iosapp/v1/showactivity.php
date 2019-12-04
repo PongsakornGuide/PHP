@@ -3,17 +3,11 @@ require_once '../includes/DbOperation.php';
 
 $response = array();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    if (isset($_POST['username']) && isset($_POST['password'])) {
-
+    if (isset($_POST['disease_id'])) {
         $db = new DbOperation();
-
-        if ($db->userLogin($_POST['username'], $_POST['password'])) {
+        if ($db->userByDisease($_POST['disease_id'])) {
             $response['error'] = false;
-            $response['user'] = $db->getUserByUsername($_POST['username']);
-//            $response['content'] = $db->showActivity();
-
+            $response['act'] = $db->getUserByDisease($_POST['disease_id']);
         } else {
             $response['error'] = true;
             $response['message'] = 'Invalid username or password';
@@ -23,10 +17,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $response['error'] = true;
         $response['message'] = 'Parameters are missing';
     }
-
-} else {
-    $response['error'] = true;
-    $response['message'] = "Request not allowed";
-}
-
 echo json_encode($response);
