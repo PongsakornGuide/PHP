@@ -7,7 +7,7 @@ class DbConnect
 
     }
     function connect(){
-         require_once 'Constants.php';
+        require_once 'Constants.php';
 //        include_once dirname(__FILE__) . '/Constants.php';
 
         // Connecting to mysql database

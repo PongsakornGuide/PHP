@@ -6,18 +6,13 @@ $response = array();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-
-
-
     if (isset($_POST['otp'])) {
 
         $db = new DbOperation();
         if ($db->checkOtp( $_POST['otp'])) {
             $response['error'] = false;
-            $response['message'] = "HELLO";
-//            $result = $db->updateStatus();
-//            $response = $db->updateStatus($_POST['id']);
-
+            $response['message'] = "OTP Correct";
+            $response = $db->updateStatus($_POST['otp']);
         } else {
             $response['error'] = true;
             $response['message'] = 'Invalid username or password';
@@ -29,8 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
 }
-
-
 else {
     $response['error'] = true;
     $response['message'] = "Request not allowed";

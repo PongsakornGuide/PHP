@@ -1,5 +1,5 @@
 <?php
-//ทำการ เรียก database มาใช้
+////ทำการ เรียก database มาใช้
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');
 define('DB_HOST', 'localhost');

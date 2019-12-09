@@ -14,7 +14,7 @@ class DbOperation
         $this->conn = $db->connect();
     }
 
-
+    //Function Login
     public function userLogin($tel){
         $stmt = $this->conn->prepare("SELECT id FROM user_apps WHERE tel = ? ");
         $stmt->bind_param("i",  $tel);
@@ -23,51 +23,119 @@ class DbOperation
         return $stmt->num_rows > 0;
     }
 
-    public function getUserByUsername($tel)
+
+
+    //Function to create a new user
+    public function createUser($username, $sername, $photo, $birthday, $gender, $tel, $address, $religion, $relative_name, $relative_phone, $relative_type, $disease_user_apps, $disease_id, $disease_detail, $activity_user_apps, $activity_name)
     {
-        $stmt = $this->conn->prepare("SELECT id, name , surname, nickname, birthday , gender , tel ,evaluated_id FROM user_apps WHERE tel = ?");
-        $stmt->bind_param("i", $tel);
-        $stmt->execute();
-        $stmt->bind_result($id, $name , $surname, $nickname, $birthday, $gender, $tel, $evaluated_id);
-        $stmt->fetch();
-        $user = array();
-        $_SESSION['id'] = $id;
-        $user['id'] = $id;
-        $user['name'] = $name;
-        $user['surname'] = $surname;
-        $user['nickname'] = $nickname;
-        $user['birthday'] = $birthday;
-        $user['gender'] = $gender;
-        $user['tel'] = $tel;
-        $user['evaluated_id'] = $evaluated_id;
-        return $user;
+        if(!$this->isUserExist($username, $sername, $photo, $birthday, $gender, $tel, $address, $religion, $relative_name, $relative_phone, $relative_type)){
+            $stmt = $this->conn->prepare("INSERT INTO user_apps (username, sername, photo, birthday, gender, tel, address, religion, relative_name, relative_phone, relative_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,)");
+            $stmt->bind_param("sssssisssss", $username, $sername, $photo, $birthday, $gender, $tel, $address, $religion, $relative_name, $relative_phone, $relative_type);
+
+
+            $stmt = $this->conn->prepare("INSERT INTO exception_disease (disease_user_apps,disease_id,disease_detail) VALUES (?,?,?)");
+            $stmt->bind_param("iis",$disease_user_apps,$disease_id,$disease_detail);
+
+
+            $stmt = $this->conn->prepare("INSERT INTO exception_activity (activity_user_apps,activity_name) VALUES (?,?)");
+            $stmt->bind_param("ii",$activity_user_apps,$activity_name);
+
+
+            if ($stmt->execute()) {
+                return USER_CREATED;
+            } else {
+                return USER_NOT_CREATED;
+            }
+        } else {
+            return USER_ALREADY_EXIST;
+        }
     }
 
 
-//    public function updateStatus(){
-//        $stmt = $this->conn->prepare("UPDATE otp SET status = '0' WHERE otp . id = id");
-//        $stmt->bind_param("i",$id);
+//    //Function to create a new user
+//    public function createUserss($username, $pass, $email, $name, $phone)
+//    {
+//        if (!$this->isUserExist($username, $email,$phone)) {
+//            $password = md5($pass);
+//            $stmt = $this->conn->prepare("INSERT INTO users (username, password, email, name, phone) VALUES (?, ?, ?, ?, ?)");
+//            $stmt->bind_param("sssss", $username, $password, $email, $name, $phone);
+//            if ($stmt->execute()) {
+//                return USER_CREATED;
+//            } else {
+//                return USER_NOT_CREATED;
+//            }
+//        } else {
+//            return USER_ALREADY_EXIST;
+//        }
+//    }
+
+
+    //    //เช็ค
+    private function isUserExist($username, $sername, $photo, $birthday, $gender, $tel, $address, $religion, $relative_name, $relative_phone, $relative_type, $disease_user_apps, $disease_id, $disease_detail, $activity_user_apps, $activity_name)
+    {
+        $stmt = $this->conn->prepare("SELECT id FROM user_apps WHERE username = ? OR sername = ? OR photo = ? OR birthday = ? OR gender = ? OR tel = ? OR address = ? OR religion = ? OR relative_name = ? OR relative_phone = ? OR relative_type = ?");
+        $stmt->bind_param("sssssisssss", $username, $sername, $photo, $birthday, $gender, $tel, $address, $religion, $relative_name, $relative_phone, $relative_type);
+
+        $stmt = $this->conn->prepare("INSERT INTO exception_disease (disease_user_apps,disease_id,disease_detail) VALUES (?,?,?)");
+        $stmt->bind_param("iis",$disease_user_apps,$disease_id,$disease_detail);
+
+
+        $stmt = $this->conn->prepare("INSERT INTO exception_activity (activity_user_apps,activity_name) VALUES (?,?)");
+        $stmt->bind_param("ii",$activity_user_apps,$activity_name);
+
+
+        $stmt->execute();
+        $stmt->store_result();
+        return $stmt->num_rows > 0;
+    }
+
+
+//    //เช็ค
+//    private function isUserExist($username, $email, $phone)
+//    {
+//        $stmt = $this->conn->prepare("SELECT id FROM users WHERE username = ? OR email = ? OR phone = ? ");
+//        $stmt->bind_param("sss", $username, $email, $phone);
 //        $stmt->execute();
 //        $stmt->store_result();
 //        return $stmt->num_rows > 0;
 //    }
 
 
-//UPDATE `otp` SET `status` = 'Unvariables' WHERE `otp`.`id` = 1;
-//INSERT INTO `otp` (`id`, `otp`, `status`, `created_at`, `update_at`) VALUES (NULL, 'sds', 'sds', CURRENT_TIMESTAMP, '0000-00-00 00:00:00.000000');
-//    public function getOtpByBackend($status){
-//        $stmt = $this->conn->prepare("UPDATE otp SET status = 'Variables' WHERE id = ?");
-//        $stmt->bind_param("s", $status);
-//        $stmt->execute();
-//        $stmt->fetch();
-//        $check = array();
-//        $check['status'] = $status;
-//        return $check;
-//    }
+    //Function Show data
+    public function getUserByUsername($tel)
+    {
+        $stmt = $this->conn->prepare("SELECT id, name , surname,  birthday , gender , tel  FROM user_apps WHERE tel = ?");
+        $stmt->bind_param("i", $tel);
+        $stmt->execute();
+        $stmt->bind_result($id, $name , $surname , $birthday, $gender, $tel);
+        $stmt->fetch();
+        $user = array();
+        $_SESSION['id'] = $id;
+        $user['id'] = $id;
+        $user['name'] = $name;
+        $user['surname'] = $surname;
+
+        $user['birthday'] = $birthday;
+        $user['gender'] = $gender;
+        $user['tel'] = $tel;
+
+        return $user;
+    }
+
+    //Function update status
+    public function updateStatus($otp){
+        $stmt = $this->conn->prepare("UPDATE otp SET status = '1' WHERE otp = ?");
+        $stmt->bind_param("s",$otp);
+        $stmt->execute();
+        $stmt->store_result();
+        return $stmt->num_rows > 0;
+    }
 
 
+
+    //Function Check status otp
     public function checkOtp($otp){
-        $stmt = $this->conn->prepare("SELECT * FROM otp WHERE otp = ?");
+        $stmt = $this->conn->prepare("SELECT id FROM otp WHERE otp = ?");
         $stmt->bind_param("s",$otp);
         $stmt->execute();
         $stmt->store_result();
@@ -81,4 +149,24 @@ class DbOperation
         $stmt->execute();
     }
 
+
+
+
+//    //Function to create a new user
+//    public function createUser($username, $pass, $email, $name, $phone)
+//    {
+//        if (!$this->isUserExist($username, $email,$phone)) {
+//            $password = md5($pass);
+//            $stmt = $this->conn->prepare("INSERT INTO users (username, password, email, name, phone) VALUES (?, ?, ?, ?, ?)");
+//
+//            $stmt->bind_param("sssss", $username, $password, $email, $name, $phone);
+//            if ($stmt->execute()) {
+//                return USER_CREATED;
+//            } else {
+//                return USER_NOT_CREATED;
+//            }
+//        } else {
+//            return USER_ALREADY_EXIST;
+//        }
+//    }
 }
